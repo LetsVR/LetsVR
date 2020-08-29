@@ -15,3 +15,6 @@ Once you run the server mode, you can connect with the Main scene to the server.
 ## What it contains:
 - basic locomotion - teleporting & snap rotate from MRTK Quest (Simulator: WASD - move, right click - rotate camera; Q/E - move down/up)
 - multi-player functionality
+
+# Cloud/Server hosting
+For cloud/server hosting of server instances, please see the [LetsVR](https://letsvr.ro) platform.
