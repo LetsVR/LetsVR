@@ -1,12 +1,12 @@
 /************************************************************************************
 Copyright : Copyright (c) Facebook Technologies, LLC and its affiliates. All rights reserved.
 
-Licensed under the Oculus Utilities SDK License Version 1.31 (the "License"); you may not use
+Licensed under the Oculus Master SDK License Version 1.0 (the "License"); you may not use
 the Utilities SDK except in compliance with the License, which is provided at the time of installation
 or download, or which otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
-https://developer.oculus.com/licenses/utilities-1.31
+https://developer.oculus.com/licenses/oculusmastersdk-1.0/
 
 Unless required by applicable law or agreed to in writing, the Utilities SDK distributed
 under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
@@ -103,7 +103,7 @@ public class OVRSkeleton : MonoBehaviour
 	private List<OVRBoneCapsule> _capsules;
 
 	private readonly Quaternion wristFixupRotation = new Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
-	public bool IsInitialized { get; private set; }
+	public bool IsInitialized { get; protected set; }
 	public bool IsDataValid { get; private set; }
 	public bool IsDataHighConfidence { get; private set; }
 	public IList<OVRBone> Bones { get; protected set; }
@@ -121,7 +121,7 @@ public class OVRSkeleton : MonoBehaviour
 		{
 			_dataProvider = GetComponent<IOVRSkeletonDataProvider>();
 		}
-		
+
 		_bones = new List<OVRBone>();
 		Bones = _bones.AsReadOnly();
 
@@ -139,7 +139,7 @@ public class OVRSkeleton : MonoBehaviour
 			Initialize();
 		}
 	}
-	
+
 	private void Initialize()
 	{
 		var skeleton = new OVRPlugin.Skeleton();
@@ -148,7 +148,7 @@ public class OVRSkeleton : MonoBehaviour
 			InitializeBones(skeleton);
 			InitializeBindPose(skeleton);
 			InitializeCapsules(skeleton);
-			
+
 			IsInitialized = true;
 		}
 	}
@@ -267,11 +267,7 @@ public class OVRSkeleton : MonoBehaviour
 				capsuleRigidBody.mass = 1.0f;
 				capsuleRigidBody.isKinematic = true;
 				capsuleRigidBody.useGravity = false;
-#if UNITY_2018_3_OR_NEWER
 				capsuleRigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-#else
-				capsuleRigidBody.collisionDetectionMode = CollisionDetectionMode.Continuous;
-#endif
 
 				var capsuleColliderGO = new GameObject((_bones[capsule.BoneIndex].Id).ToString() + "_CapsuleCollider");
 				capsuleColliderGO.transform.SetParent(capsuleRigidBodyGO.transform, false);

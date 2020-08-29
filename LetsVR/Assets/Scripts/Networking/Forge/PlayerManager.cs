@@ -13,19 +13,17 @@ namespace LetsVR.XR.Networking.Forge
 
 			// create player
 			var player = (Player)NetworkManager.Instance.InstantiatePlayer(position: Vector3.zero, rotation: Quaternion.identity);
-			player.networkObject.platformId = AppState.IsDesktopMode ? (short)0 : (short)1;
+			player.networkObject.platformId = Application.platform == RuntimePlatform.Android ? (short)1 : (short)0;
 			player.CameraParent = cameraParent;
 			ulong playerIdentifier = AppState.MultiuserName.Hash();
 
 			// create controllers
 			var leftControllerSync = NetworkManager.Instance.InstantiateControllerSync() as ControllerSync;
 			leftControllerSync.isLeftController = true;
-			leftControllerSync.isHandsMode = AppState.IsDesktopMode ? false : AppState.IsHandsMode;
 			leftControllerSync.networkObject.playerIdentifier = playerIdentifier; 
 
 			var rightControllerSync = NetworkManager.Instance.InstantiateControllerSync() as ControllerSync;
 			rightControllerSync.isLeftController = false;
-			rightControllerSync.isHandsMode = AppState.IsDesktopMode ? false : AppState.IsHandsMode;
 			rightControllerSync.networkObject.playerIdentifier = playerIdentifier;
 		}
 	}

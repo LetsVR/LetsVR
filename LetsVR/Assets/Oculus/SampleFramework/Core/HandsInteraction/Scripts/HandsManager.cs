@@ -187,8 +187,8 @@ namespace OculusSampleFramework
 			RightHandSkeletonRenderer = _rightHand.GetComponent<OVRSkeletonRenderer>();
 			RightHandMesh = _rightHand.GetComponent<OVRMesh>();
 			RightHandMeshRenderer = _rightHand.GetComponent<OVRMeshRenderer>();
-			_leftMeshRenderer = LeftHand.GetComponentInChildren<SkinnedMeshRenderer>();
-			_rightMeshRenderer = RightHand.GetComponentInChildren<SkinnedMeshRenderer>();
+			_leftMeshRenderer = LeftHand.GetComponent<SkinnedMeshRenderer>();
+			_rightMeshRenderer = RightHand.GetComponent<SkinnedMeshRenderer>();
 			StartCoroutine(FindSkeletonVisualGameObjects());
 		}
 

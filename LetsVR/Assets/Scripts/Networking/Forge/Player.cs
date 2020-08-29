@@ -5,7 +5,6 @@ using LetsVR.XR.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using VRTK;
 
 namespace LetsVR.XR.Networking.Forge
 {
@@ -78,73 +77,6 @@ namespace LetsVR.XR.Networking.Forge
 			}
 
 			AlignWithCamera();
-		}
-
-		private IEnumerator SetupOwnerVRRig()
-		{
-			yield return new WaitUntil(() => Camera.main != null);
-
-			var runtimeLeftHand = VRTK_DeviceFinder.GetControllerLeftHand(true).transform;
-			var runtimeRightHand = VRTK_DeviceFinder.GetControllerRightHand(true).transform;
-			var runtimehead = Camera.main.transform;
-
-			if (isDesktop)
-				runtimehead = runtimehead.parent;
-
-			var vrRig = avatar.GetComponent<VRRig>();
-
-			vrRig.head.vrTarget = runtimehead;
-			vrRig.leftHand.vrTarget = runtimeLeftHand;
-			vrRig.rightHand.vrTarget = runtimeRightHand;
-
-			avatar.gameObject.SetActive(true);
-		}
-
-		private IEnumerator SetupGuestVRRig()
-		{
-			if (NetworkManager.Instance == null)
-				yield break;
-
-			List<NetworkObject> networkObjectList = NetworkManager.Instance.Networker.NetworkObjectList;
-			
-			if (avatar == null)
-				yield break;
-			
-			var vrRig = avatar.GetComponent<VRRig>();
-
-			foreach (NetworkObject netobj in networkObjectList)
-			{
-				if (!(netobj is ControllerSyncNetworkObject))
-					continue;
-
-				var syncObject = (ControllerSyncNetworkObject)netobj;
-
-				if (syncObject.AttachedBehavior is ControllerSync attachedBehavior)
-				{
-					if (attachedBehavior.networkObject.playerIdentifier == GetNetworkIdentifier()) // identify player
-					{
-						if (attachedBehavior.isLeftController)
-						{
-							vrRig.leftHand.vrTarget = attachedBehavior.gameObject.transform;
-						}
-						else
-						{
-							vrRig.rightHand.vrTarget = attachedBehavior.gameObject.transform;
-						}
-					}
-				}
-			}
-
-			if (vrRig.head.vrTarget == null)
-			{
-				vrRig.head.vrTarget = transform;
-			}
-
-			if (vrRig.rightHand.vrTarget && vrRig.leftHand.vrTarget && vrRig.head.vrTarget)
-			{
-				avatar.gameObject.SetActive(true);
-				vrRig.OnlyYOffet = true;
-			}
 		}
 
 		public ulong GetNetworkIdentifier()

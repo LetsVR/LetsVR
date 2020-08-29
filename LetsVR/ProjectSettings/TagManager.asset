@@ -7,6 +7,9 @@ TagManager:
   - Teleport
   - VRGazeInteractable
   - VRRayInteractable
+  - projectile
+  - UI
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -39,7 +42,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Spatial Awareness
   m_SortingLayers:
   - name: Default
     uniqueID: 0

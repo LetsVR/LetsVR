@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedInterpol("{\"inter\":[0.15,0.15,0,0,0]")]
+	[GeneratedInterpol("{\"inter\":[0.15,0.15,0,0,0,0.15,0.15]")]
 	public partial class ControllerSyncNetworkObject : NetworkObject
 	{
 		public const int IDENTITY = 9;
@@ -170,6 +170,68 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (isHandsModeChanged != null) isHandsModeChanged(_isHandsMode, timestep);
 			if (fieldAltered != null) fieldAltered("isHandsMode", _isHandsMode, timestep);
 		}
+		[ForgeGeneratedField]
+		private Vector3 _pointerPosition;
+		public event FieldEvent<Vector3> pointerPositionChanged;
+		public InterpolateVector3 pointerPositionInterpolation = new InterpolateVector3() { LerpT = 0.15f, Enabled = true };
+		public Vector3 pointerPosition
+		{
+			get { return _pointerPosition; }
+			set
+			{
+				// Don't do anything if the value is the same
+				if (_pointerPosition == value)
+					return;
+
+				// Mark the field as dirty for the network to transmit
+				_dirtyFields[0] |= 0x20;
+				_pointerPosition = value;
+				hasDirtyFields = true;
+			}
+		}
+
+		public void SetpointerPositionDirty()
+		{
+			_dirtyFields[0] |= 0x20;
+			hasDirtyFields = true;
+		}
+
+		private void RunChange_pointerPosition(ulong timestep)
+		{
+			if (pointerPositionChanged != null) pointerPositionChanged(_pointerPosition, timestep);
+			if (fieldAltered != null) fieldAltered("pointerPosition", _pointerPosition, timestep);
+		}
+		[ForgeGeneratedField]
+		private Quaternion _pointerRotation;
+		public event FieldEvent<Quaternion> pointerRotationChanged;
+		public InterpolateQuaternion pointerRotationInterpolation = new InterpolateQuaternion() { LerpT = 0.15f, Enabled = true };
+		public Quaternion pointerRotation
+		{
+			get { return _pointerRotation; }
+			set
+			{
+				// Don't do anything if the value is the same
+				if (_pointerRotation == value)
+					return;
+
+				// Mark the field as dirty for the network to transmit
+				_dirtyFields[0] |= 0x40;
+				_pointerRotation = value;
+				hasDirtyFields = true;
+			}
+		}
+
+		public void SetpointerRotationDirty()
+		{
+			_dirtyFields[0] |= 0x40;
+			hasDirtyFields = true;
+		}
+
+		private void RunChange_pointerRotation(ulong timestep)
+		{
+			if (pointerRotationChanged != null) pointerRotationChanged(_pointerRotation, timestep);
+			if (fieldAltered != null) fieldAltered("pointerRotation", _pointerRotation, timestep);
+		}
 
 		protected override void OwnershipChanged()
 		{
@@ -184,6 +246,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			isLeftControllerInterpolation.current = isLeftControllerInterpolation.target;
 			playerIdentifierInterpolation.current = playerIdentifierInterpolation.target;
 			isHandsModeInterpolation.current = isHandsModeInterpolation.target;
+			pointerPositionInterpolation.current = pointerPositionInterpolation.target;
+			pointerRotationInterpolation.current = pointerRotationInterpolation.target;
 		}
 
 		public override int UniqueIdentity { get { return IDENTITY; } }
@@ -195,6 +259,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			UnityObjectMapper.Instance.MapBytes(data, _isLeftController);
 			UnityObjectMapper.Instance.MapBytes(data, _playerIdentifier);
 			UnityObjectMapper.Instance.MapBytes(data, _isHandsMode);
+			UnityObjectMapper.Instance.MapBytes(data, _pointerPosition);
+			UnityObjectMapper.Instance.MapBytes(data, _pointerRotation);
 
 			return data;
 		}
@@ -221,6 +287,14 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			isHandsModeInterpolation.current = _isHandsMode;
 			isHandsModeInterpolation.target = _isHandsMode;
 			RunChange_isHandsMode(timestep);
+			_pointerPosition = UnityObjectMapper.Instance.Map<Vector3>(payload);
+			pointerPositionInterpolation.current = _pointerPosition;
+			pointerPositionInterpolation.target = _pointerPosition;
+			RunChange_pointerPosition(timestep);
+			_pointerRotation = UnityObjectMapper.Instance.Map<Quaternion>(payload);
+			pointerRotationInterpolation.current = _pointerRotation;
+			pointerRotationInterpolation.target = _pointerRotation;
+			RunChange_pointerRotation(timestep);
 		}
 
 		protected override BMSByte SerializeDirtyFields()
@@ -238,6 +312,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _playerIdentifier);
 			if ((0x10 & _dirtyFields[0]) != 0)
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _isHandsMode);
+			if ((0x20 & _dirtyFields[0]) != 0)
+				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _pointerPosition);
+			if ((0x40 & _dirtyFields[0]) != 0)
+				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _pointerRotation);
 
 			// Reset all the dirty fields
 			for (int i = 0; i < _dirtyFields.Length; i++)
@@ -319,6 +397,32 @@ namespace BeardedManStudios.Forge.Networking.Generated
 					RunChange_isHandsMode(timestep);
 				}
 			}
+			if ((0x20 & readDirtyFlags[0]) != 0)
+			{
+				if (pointerPositionInterpolation.Enabled)
+				{
+					pointerPositionInterpolation.target = UnityObjectMapper.Instance.Map<Vector3>(data);
+					pointerPositionInterpolation.Timestep = timestep;
+				}
+				else
+				{
+					_pointerPosition = UnityObjectMapper.Instance.Map<Vector3>(data);
+					RunChange_pointerPosition(timestep);
+				}
+			}
+			if ((0x40 & readDirtyFlags[0]) != 0)
+			{
+				if (pointerRotationInterpolation.Enabled)
+				{
+					pointerRotationInterpolation.target = UnityObjectMapper.Instance.Map<Quaternion>(data);
+					pointerRotationInterpolation.Timestep = timestep;
+				}
+				else
+				{
+					_pointerRotation = UnityObjectMapper.Instance.Map<Quaternion>(data);
+					RunChange_pointerRotation(timestep);
+				}
+			}
 		}
 
 		public override void InterpolateUpdate()
@@ -350,6 +454,16 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			{
 				_isHandsMode = (bool)isHandsModeInterpolation.Interpolate();
 				//RunChange_isHandsMode(isHandsModeInterpolation.Timestep);
+			}
+			if (pointerPositionInterpolation.Enabled && !pointerPositionInterpolation.current.UnityNear(pointerPositionInterpolation.target, 0.0015f))
+			{
+				_pointerPosition = (Vector3)pointerPositionInterpolation.Interpolate();
+				//RunChange_pointerPosition(pointerPositionInterpolation.Timestep);
+			}
+			if (pointerRotationInterpolation.Enabled && !pointerRotationInterpolation.current.UnityNear(pointerRotationInterpolation.target, 0.0015f))
+			{
+				_pointerRotation = (Quaternion)pointerRotationInterpolation.Interpolate();
+				//RunChange_pointerRotation(pointerRotationInterpolation.Timestep);
 			}
 		}
 

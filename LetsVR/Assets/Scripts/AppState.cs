@@ -23,6 +23,5 @@ namespace LetsVR.XR
 
 		public static bool IsServerMode { get; set; }
 		public static string MultiuserName { get; internal set; } = "?";
-		public static bool IsHandsMode { get; internal set; }
 	}
 }

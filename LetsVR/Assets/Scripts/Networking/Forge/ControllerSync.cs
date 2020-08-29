@@ -1,17 +1,66 @@
 ﻿using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking.Unity;
+using LetsVR.XR.Utilities;
+using Microsoft.MixedReality.Toolkit;
+using Microsoft.MixedReality.Toolkit.Input;
+using Microsoft.MixedReality.Toolkit.Utilities;
+using prvncher.MixedReality.Toolkit.OculusQuestInput;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using VRTK;
 
 namespace LetsVR.XR.Networking.Forge
 {
+	class DummyInputSource : IMixedRealityInputSource
+	{
+		public IMixedRealityPointer[] Pointers => Array.Empty<IMixedRealityPointer>();
+
+		public InputSourceType SourceType => InputSourceType.Other;
+
+		public uint SourceId => 100000;
+
+		public string SourceName => "Manual";
+
+		public new bool Equals(object x, object y)
+		{
+			return ReferenceEquals(x, y);
+		}
+
+		public int GetHashCode(object obj)
+		{
+			return obj.GetHashCode();
+		}
+	}
+	class DummyController : IMixedRealityController
+	{
+		public bool Enabled { get; set; }
+
+		public TrackingState TrackingState => TrackingState.Tracked;
+
+		public Handedness ControllerHandedness => Handedness.Left;
+
+		public IMixedRealityInputSource InputSource => new DummyInputSource();
+
+		public IMixedRealityControllerVisualizer Visualizer => null;
+
+		public bool IsPositionAvailable => true;
+
+		public bool IsPositionApproximate => false;
+
+		public bool IsRotationAvailable => true;
+
+		public MixedRealityInteractionMapping[] Interactions => Array.Empty<MixedRealityInteractionMapping>();
+
+		public Vector3 AngularVelocity => Vector3.zero;
+
+		public Vector3 Velocity => Vector3.zero;
+
+		public bool IsInPointingPose => true;
+	}
+
 	public class ControllerSync : ControllerSyncBehavior
 	{
-		private Transform actualHand;
-
 		[Header("Forge synced values")]
 		public bool isLeftController = true;
 		public bool isHandsMode = true;
@@ -19,19 +68,26 @@ namespace LetsVR.XR.Networking.Forge
 		[Header("Oculus hands and controllers")]
 		[SerializeField] GameObject OVRLeftHand;
 		[SerializeField] GameObject OVRRightHand;
-		[SerializeField] GameObject OVRLeftHandController;
-		[SerializeField] GameObject OVRRightHandController;
+		[SerializeField] GameObject OVRLeftController;
+		[SerializeField] GameObject OVRRightController;
+
+		[Header("Pointer")]
+		[SerializeField] GameObject Pointer;
 
 		[Header("Debug")]
 		[SerializeField] ulong playerIdentifier;
+		[SerializeField] bool isFocusedLocked;
+		[SerializeField] Vector3 pointerPosition;
+		[SerializeField] Quaternion pointerRotation;
+
+		// class
+		Transform anchor;
 
 		Player player;
 
-		void Start()
+		private void Awake()
 		{
-			GetComponentInChildren<VRTK_ControllerEvents>().enabled = true;
-			GetComponentInChildren<StraightPointerRendererWithCursor>().enabled = true;
-			GetComponentInChildren<VRTK_Pointer>().enabled = true;
+			Pointer.GetComponent<ShellHandRayPointer>().Controller = new DummyController { Enabled = true };
 		}
 
 		private void Update()
@@ -41,18 +97,22 @@ namespace LetsVR.XR.Networking.Forge
 
 			playerIdentifier = networkObject.playerIdentifier;
 
-			GetComponentInChildren<VRTK_ControllerEvents>().enabled = true;
-			GetComponentInChildren<StraightPointerRendererWithCursor>().enabled = true;
-			GetComponentInChildren<VRTK_Pointer>().enabled = true;
+			if (player == null)
+			{
+				GetPlayer();
+			}
 
 			if (!networkObject.IsOwner)
 			{
 				// If we are not the owner then we set the position to the
 				// position that is syndicated across the network for this player
 				transform.position = networkObject.position;
-                transform.rotation = networkObject.rotation;
+				transform.rotation = networkObject.rotation;
 				isLeftController = networkObject.isLeftController;
 				isHandsMode = networkObject.isHandsMode;
+
+				pointerPosition = networkObject.pointerPosition;
+				pointerRotation = networkObject.pointerRotation;
 
 				// show hands only if the player is a device, not desktop
 				if (player != null)
@@ -61,49 +121,80 @@ namespace LetsVR.XR.Networking.Forge
 					{
 						OVRLeftHand.SetActive(false);
 						OVRRightHand.SetActive(false);
-						OVRLeftHandController.SetActive(false);
-						OVRRightHandController.SetActive(false);
+						OVRLeftController.SetActive(false);
+						OVRRightController.SetActive(false);
+
+						Pointer.SetActive(false);
 					}
 					else
 					{
-						if (isHandsMode)
-						{
-							OVRLeftHand.SetActive(isLeftController);
-							OVRRightHand.SetActive(!isLeftController);
-						}
-						else
-						{
-							OVRLeftHandController.SetActive(isLeftController);
-							OVRRightHandController.SetActive(!isLeftController);
-						}
+						OVRLeftHand.SetActive(isLeftController && isHandsMode);
+						OVRRightHand.SetActive(!isLeftController && isHandsMode);
+						OVRLeftController.SetActive(isLeftController && !isHandsMode);
+						OVRRightController.SetActive(!isLeftController && !isHandsMode);
+
+						// sync Owner pointers
+						Pointer.transform.localPosition = transform.InverseTransformPoint(pointerPosition);
+						Pointer.transform.localRotation = Quaternion.Inverse(transform.rotation) * pointerRotation;
 					}
 				}
 				return;
 			}
 
-			if (!actualHand)
+			Handedness handedness = isLeftController ? Handedness.Left : Handedness.Right;
+			var hand = HandJointUtils.FindHand(handedness);
+
+			if (hand is BaseHand)
 			{
-				VRTK_SDKSetup sdkType = VRTK_SDKManager.GetLoadedSDKSetup();
-				if (sdkType != null)
+				isHandsMode = true;
+			}
+			else if (hand is BaseController)
+			{
+				isHandsMode = false;
+			}
+
+			// TODO: handle SteamVR
+			if (hand is OculusQuestController || hand is OculusQuestHand)
+			{
+				var playSpace = GameObject.Find("MixedRealityPlayspace");
+
+				if (anchor == null)
 				{
 					if (isLeftController)
-					{
-						actualHand = VRTK_DeviceFinder.GetControllerLeftHand(true).transform;
-					}
+						anchor = playSpace.GetComponentInChildren<OVRCameraRig>()?.transform.Find("TrackingSpace/LeftHandAnchor");
 					else
+						anchor = playSpace.GetComponentInChildren<OVRCameraRig>()?.transform.Find("TrackingSpace/RightHandAnchor");
+				}
+
+				if (anchor != null)
+				{
+					transform.position = anchor.position;
+					transform.rotation = anchor.rotation;
+				}
+
+				// sync Owner pointers
+				var generatedPointers = playSpace.GetComponentsInChildren<ShellHandRayPointer>();
+
+				foreach (var poseSync in generatedPointers)
+				{
+					if (isLeftController && poseSync.Handedness == Handedness.Left)
 					{
-						actualHand = VRTK_DeviceFinder.GetControllerRightHand(true).transform;
+						pointerPosition = poseSync.transform.position;
+						pointerRotation = poseSync.transform.rotation;
+
+						Pointer.transform.localPosition = transform.InverseTransformPoint(pointerPosition);
+						Pointer.transform.localRotation = Quaternion.Inverse(transform.rotation) * pointerRotation;
+					}
+					if (!isLeftController && poseSync.Handedness == Handedness.Right)
+					{
+						pointerPosition = poseSync.transform.position;
+						pointerRotation = poseSync.transform.rotation;
+
+						Pointer.transform.localPosition = transform.InverseTransformPoint(pointerPosition);
+						Pointer.transform.localRotation = Quaternion.Inverse(transform.rotation) * pointerRotation;
 					}
 				}
 			}
-
-			// get position/rotation from Owner controllers
-			if (actualHand != null)
-            {
-                transform.SetParent(actualHand.parent.transform);
-                transform.position = actualHand.position;
-                transform.rotation = actualHand.rotation;
-            }
 
 			// When our position changes the networkObject.position will detect the
 			// change based on this assignment automatically, this data will then be
@@ -111,11 +202,39 @@ namespace LetsVR.XR.Networking.Forge
 			networkObject.isLeftController = isLeftController;
 			networkObject.isHandsMode = isHandsMode;
 			networkObject.position = transform.position;
-            networkObject.rotation = transform.rotation;
+			networkObject.rotation = transform.rotation;
 
-            if (transform.localScale == Vector3.zero)
-            {
-                transform.localScale = Vector3.one;
+			networkObject.pointerPosition = pointerPosition;
+			networkObject.pointerRotation = pointerRotation;
+
+			if (transform.localScale == Vector3.zero)
+			{
+				transform.localScale = Vector3.one;
+			}
+		}
+
+		private void GetPlayer()
+		{
+			List<NetworkObject> networkObjectList = NetworkManager.Instance.Networker.NetworkObjectList;
+
+			foreach (NetworkObject netobj in networkObjectList)
+			{
+				if (!(netobj is PlayerNetworkObject))
+					continue;
+
+				var syncObject = (PlayerNetworkObject)netobj;
+
+				if (syncObject.AttachedBehavior is Player attachedBehavior)
+				{
+					if (string.IsNullOrEmpty(attachedBehavior.Name))
+						break;
+
+					if (attachedBehavior.GetNetworkIdentifier() == networkObject.playerIdentifier)
+					{
+						player = attachedBehavior;
+						break;
+					}
+				}
 			}
 		}
 	}
