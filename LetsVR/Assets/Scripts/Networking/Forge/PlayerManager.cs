@@ -1,5 +1,8 @@
 ﻿using BeardedManStudios.Forge.Networking.Unity;
 using LetsVR.XR.Utilities;
+using Microsoft.MixedReality.Toolkit;
+using prvncher.MixedReality.Toolkit.OculusQuestInput;
+using System.Linq;
 using UnityEngine;
 
 namespace LetsVR.XR.Networking.Forge
@@ -11,9 +14,11 @@ namespace LetsVR.XR.Networking.Forge
 			if (NetworkManager.Instance == null)
 				return;
 
+
 			// create player
 			var player = (Player)NetworkManager.Instance.InstantiatePlayer(position: Vector3.zero, rotation: Quaternion.identity);
-			player.networkObject.platformId = Application.platform == RuntimePlatform.Android ? (short)1 : (short)0;
+			// TODO: detect platform properly
+			player.networkObject.platformId = CoreServices.InputSystem.DetectedControllers.Any(c => c is OculusQuestController || c is OculusQuestHand) ? (short)1 : (short)0;
 			player.CameraParent = cameraParent;
 			ulong playerIdentifier = AppState.MultiuserName.Hash();
 

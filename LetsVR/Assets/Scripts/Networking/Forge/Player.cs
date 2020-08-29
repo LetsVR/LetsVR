@@ -1,17 +1,12 @@
 ﻿using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Generated;
-using BeardedManStudios.Forge.Networking.Unity;
 using LetsVR.XR.Utilities;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LetsVR.XR.Networking.Forge
 {
 	public sealed class Player : PlayerBehavior
 	{
-		Transform avatar;
-
 		[SerializeField] TMPro.TextMeshPro textMesh;
 
 		[Header("Debug")]
@@ -31,31 +26,21 @@ namespace LetsVR.XR.Networking.Forge
 
 			Debug.Log($"[Player:{networkObject.Owner.NetworkId}] Network start");
 
-			isDesktop = networkObject.platformId == 0;
-
-			if (isDesktop)
-				avatar = gameObject.transform.Find("DesktopAvatar");
-			else
-				avatar = gameObject.transform.Find("OculusAvatar");
-
 			if (networkObject.IsOwner)
 			{
 				PlayerInLocalScene = this;
 
 				// Assign the name when this object is setup on the network
 				ChangeName();
-
-				//if (networkObject.Networker is IClient)
-				//	StartCoroutine(SetupOwnerVRRig());
 			}
-
-			avatar.gameObject.SetActive(true);
 		}
 
 		private void Update()
 		{
 			if (networkObject == null)
 				return;
+
+			isDesktop = networkObject.platformId == 0;
 
 			if (networkObject.IsOwner)
 			{
@@ -65,15 +50,12 @@ namespace LetsVR.XR.Networking.Forge
 				networkObject.position = transform.position;
 				networkObject.rotation = transform.rotation;
 			}
-			// Check to see if we are the owner of this player
 			else
 			{
 				// If we are not the owner then we set the position to the
 				// position that is syndicated across the network for this player
 				transform.position = networkObject.position;
 				transform.rotation = networkObject.rotation;
-
-				//StartCoroutine(SetupGuestVRRig());
 			}
 
 			AlignWithCamera();
@@ -116,6 +98,13 @@ namespace LetsVR.XR.Networking.Forge
 			networkObject.Owner.Name = Name; // update the name of the NetworkingPlayer for when destroying the player & controllers
 
 			SetPlayerIdentificators();
+			
+			// Send an RPC to let everyone know what the name is for this player
+			// We use "AllBuffered" so that if people come late they will get the
+			// latest name for this object
+			// We pass in "Name" for the args because we have 1 argument that is to
+			// be a string as it is set in the NCW
+			networkObject.SendRpc(RPC_UPDATE_NAME, Receivers.AllBuffered, Name);
 		}
 
 		void AlignWithCamera()

@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"string\", \"string\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"name\", \"color\"]]")]
+	[GeneratedRPC("{\"types\":[[\"string\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"name\"]]")]
 	public abstract partial class PlayerBehavior : NetworkBehavior
 	{
 		public const byte RPC_UPDATE_NAME = 0 + 5;
@@ -22,7 +22,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("UpdateName", UpdateName, typeof(string), typeof(string));
+			networkObject.RegisterRpc("UpdateName", UpdateName, typeof(string));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -102,7 +102,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// <summary>
 		/// Arguments:
 		/// string name
-		/// string color
 		/// </summary>
 		public abstract void UpdateName(RpcArgs args);
 
