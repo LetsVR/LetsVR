@@ -1,7 +1,7 @@
 # LetsVR
 
 LetsVR is a open-source VR collaboration platform based on [ForgeNetworking](https://github.com/BeardedManStudios/ForgeNetworkingRemastered).
-LetVR supports SteamVR (HTC Vive) and Oculus (Oculus Quest/Link) as well as Desktop/Standalone using VR simulator from VRTK.
+LetVR supports Oculus (Oculus Quest/Link) - SteamVR/OpenVR support will be added - as well as Desktop/Standalone using VR simulator from MRTK.
 
 ## How to use
 LetsVR contains two scenes: ServerMode and Main.
@@ -13,5 +13,5 @@ The Main is the main scene with Unity objects.
 Once you run the server mode, you can connect with the Main scene to the server.
 
 ## What it contains:
-- basic locomotion - teleporting & snap rotate
+- basic locomotion - teleporting & snap rotate from MRTK Quest
 - multi-player functinality

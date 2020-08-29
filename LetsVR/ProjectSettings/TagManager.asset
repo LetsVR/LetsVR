@@ -8,8 +8,9 @@ TagManager:
   - VRGazeInteractable
   - VRRayInteractable
   - projectile
-  - UI
   - FxTemporaire
+  - TeleportIgnore
+  - ExcludeTeleport
   layers:
   - Default
   - TransparentFX
