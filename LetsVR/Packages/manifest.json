@@ -11,6 +11,7 @@
     "com.unity.jobs": "0.2.10-preview.12",
     "com.unity.mobile.android-logcat": "1.1.1",
     "com.unity.postprocessing": "2.3.0",
+    "com.unity.render-pipelines.universal": "8.2.0",
     "com.unity.shadergraph": "8.2.0",
     "com.unity.test-framework": "1.1.16",
     "com.unity.textmeshpro": "3.0.1",
