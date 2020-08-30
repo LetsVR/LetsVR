@@ -13,11 +13,6 @@ namespace LetsVR.XR.Networking
 		{
 			AppState.IsServerMode = true;
 			Application.targetFrameRate = 30;
-		
-			//VoipStarter voipStarter = GetComponent<VoipStarter>();
-			//voipStarter.connections = Preferences.MaxConnections;
-			//voipStarter.hostPort = Preferences.ServerVOIPPort;
-			//voipStarter.enabled = true;
 
 			ForgeNetwork.MaxConnections = 64;
 			ForgeNetwork.StartStopServer("127.0.0.1", 15010, NetworkManager, true);
