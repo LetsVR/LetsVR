@@ -1,6 +1,6 @@
 # LetsVR
 
-LetsVR is an open-source VR collaboration platform based on [ForgeNetworking](https://github.com/BeardedManStudios/ForgeNetworkingRemastered), [MRTK](https://github.com/Microsoft/HoloToolkit-Unity) and [MRTK Quest](https://github.com/provencher/MRTK-Quest).
+LetsVR is free and open-source VR collaboration platform based on [ForgeNetworking](https://github.com/BeardedManStudios/ForgeNetworkingRemastered), [MRTK](https://github.com/Microsoft/HoloToolkit-Unity) and [MRTK Quest](https://github.com/provencher/MRTK-Quest).
 LetVR supports Oculus (Oculus Quest/Link) - SteamVR/OpenVR support will be added - as well as Desktop/Standalone mode using VR simulator from MRTK.
 
 ## How to use
